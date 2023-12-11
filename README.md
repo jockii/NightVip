@@ -34,6 +34,8 @@ addons/counterstrikesharp/configs/plugins/NightVip/NightVip.json
 - [ ] Bunnyhop
 - [ ] Jump count
 - [ ] Maybe something else
+### `Note`
+The plugin has not been tested properly due to the lack of a large number of people. If you find any bugs or errors please let me know. Thank you.
 ### `Support`
 If you have a desire or want to support me, you can buy me tea)
  [CLICK](https://www.buymeacoffee.com/jockii)
