@@ -39,7 +39,7 @@ addons/counterstrikesharp/configs/plugins/NightVip/NightVip.json
 !nv
 ```
 ### `To do list`
-- [ ] Issuance of weapons (specify which one) 
+- [x] Issuance of weapons (specify which one) 
 - [ ] Bunnyhop
 - [ ] Jump count
 - [ ] Maybe something else
