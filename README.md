@@ -33,7 +33,7 @@ addons/counterstrikesharp/configs/plugins/NightVip/NightVip.json
   ]
 "ConfigVersion": 1                //  non uses
 ```
-Follow the data entry formats from the cronfig example.
+Follow the data entry formats from the config example.
 ### `Commands`
 ```
 !nightvip
