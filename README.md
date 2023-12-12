@@ -8,6 +8,7 @@ The following are currently available:
 * Money
 * Gravity
 * HealthShot
+* Weapons in list
 * ClanTag in scoreboard
 ### `Config`
 addons/counterstrikesharp/configs/plugins/NightVip/NightVip.json
