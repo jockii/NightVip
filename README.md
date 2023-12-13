@@ -1,4 +1,4 @@
-![Static Badge](https://img.shields.io/badge/ver-1.0.0-darkgreen)
+![Static Badge](https://img.shields.io/badge/ver-1.1.0-darkgreen)
 ![Static Badge](https://img.shields.io/badge/CSSharp-v116%2B-purple)
 ## `About`
 Plugin gives player basic VIP privileges, but for a certain period of time.
@@ -8,6 +8,7 @@ The following are currently available:
 * Money
 * Gravity
 * HealthShot
+* Weapons in list
 * ClanTag in scoreboard
 ### `Config`
 addons/counterstrikesharp/configs/plugins/NightVip/NightVip.json
@@ -21,8 +22,18 @@ addons/counterstrikesharp/configs/plugins/NightVip/NightVip.json
 "Money": 16000,                   //  Amount money(when player spawned)
 "Gravity": 0.8,                   //  Gravity... (default 0.7)
 "GiveHealthShot": true,           //  give player healthshot?
+"GivePlayerItem": true,           // give weapon in list:
+"WeaponsList": [
+    "weapon_ak47",
+    "weapon_deagle",
+    "weapon_hegrenade",
+    "weapon_molotov",
+    "weapon_smokegrenade",
+    "weapon_flashbang"
+  ]
 "ConfigVersion": 1                //  non uses
 ```
+Follow the data entry formats from the config example.
 ### `Commands`
 ```
 !nightvip
@@ -30,7 +41,7 @@ addons/counterstrikesharp/configs/plugins/NightVip/NightVip.json
 !nv
 ```
 ### `To do list`
-- [ ] Issuance of weapons (specify which one) 
+- [x] Issuance of weapons (specify which one) 
 - [ ] Bunnyhop
 - [ ] Jump count
 - [ ] Maybe something else
