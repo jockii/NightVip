@@ -5,9 +5,12 @@ using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Utils;
+using CounterStrikeSharp.API.Modules.Listeners;
 using System;
 using System.Data;
+using System.Numerics;
 using System.Text.Json.Serialization;
+using static CounterStrikeSharp.API.Core.Listeners;
 
 namespace NightVip;
 
@@ -20,21 +23,26 @@ public class NightVipConfig : BasePluginConfig
     [JsonPropertyName("Health")] public int Health { get; set; } = 100;
     [JsonPropertyName("Armor")] public int Armor { get; set; } = 100;
     [JsonPropertyName("Money")] public int Money { get; set; } = 16000;
-    [JsonPropertyName("Gravity")] public float Gravity { get; set; } = 0.8f;
+    [JsonPropertyName("Gravity")] public float Gravity { get; set; } = 1.0f;
+    [JsonPropertyName("AutoGiveVip")] public bool AutoGiveVip { get; set; } = true;
+
+    //[JsonPropertyName("EnableBunnyHop")] public bool EnableBunnyHop { get; set; } = true;
+
     [JsonPropertyName("GiveHealthShot")] public bool GiveHealthShot { get; set; } = true;
     [JsonPropertyName("GivePlayerItem")] public bool GivePlayerItem { get; set; } = true;
     [JsonPropertyName("WeaponsList")] public List<string?> WeaponsList { get; set; } = new List<string?> { "weapon_ak47", "weapon_deagle" };
-
-    //[JsonPropertyName("EnableBunnyHop")] public bool EnableBunnyHop { get; set; } = true;
 }
 
 [MinimumApiVersion(116)]
 public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 {
     public override string ModuleName => "NightVip";
-    public override string ModuleVersion => "v1.1.0";
+    public override string ModuleVersion => "v1.2.0";
     public override string ModuleAuthor => "jockii";
+
     public List<int?> _vips = new List<int?>();
+    public int Round = 0;
+
     public NightVipConfig Config { get; set; } = new NightVipConfig();
     public void OnConfigParsed(NightVipConfig config)
     {
@@ -42,6 +50,9 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
     }
     public override void Load(bool hotReload)
     {
+        if(Config.AutoGiveVip)
+            RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
+
         Console.WriteLine($"##########################################\n" +
             $"Plugin: {ModuleName} {ModuleVersion}\nAuthor: {ModuleAuthor}\nInfo: https://github.com/jockii\nSupport me: https://www.buymeacoffee.com/jockii\n" +
             $"##########################################");
@@ -65,10 +76,35 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
         }
         return time;
     }
+
+    //private void SetupBhop(CCSPlayerController player)
+    //{
+    //    if (player == null || !player.IsValid || player.IsBot || player.IsHLTV || !player.PlayerPawn.IsValid)
+    //        return;
+    //    else
+    //    {
+    //        Server.ExecuteCommand("sv_cheats true");
+    //        player.ExecuteClientCommand("sv_autobunnyhopping true");
+    //        Server.ExecuteCommand("sv_cheats false");
+    //    }
+    //}
+
     private void GiveWeaponItem(CCSPlayerController pl, string item)
     {
         if (item == null || item == "") return;
         else pl.GiveNamedItem(item);
+    }
+
+    private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
+    {
+        CCSPlayerController player = @event.Userid;
+
+        if (player == null || !player.IsValid || player.IsBot || player.IsHLTV || !player.PlayerPawn.IsValid) 
+            return HookResult.Continue;
+        else
+            _vips.Add(player.UserId);
+
+        return HookResult.Continue;
     }
 
     [ConsoleCommand("nightvip", "Add players in vips list")]
@@ -101,7 +137,6 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
                         controller.PawnHasHelmet = true;
                         controller.InGameMoneyServices!.Account = Config.Money;
                         controller.Pawn.Value.GravityScale = Config.Gravity;
-                        //AddPlayerSpeed(controller, Config.Speed);
 
                         if (Config.GiveHealthShot)
                             controller.GiveNamedItem("weapon_healthshot");
@@ -132,16 +167,10 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
             if (_vips.Contains(pl.UserId))
             {
-               //bool haveC4 = pl.PlayerPawn.Value!.WeaponServices!.Pawn.Value.DesignerName.Contains("weapon_c4");
-
                 AddTimer(1.0f, () =>
                 {
                     if (Config.GivePlayerItem)
                     {
-                       // pl.RemoveWeapons();
-                       // if (haveC4) pl.GiveNamedItem("weapon_c4");
-                       // pl.GiveNamedItem("weapon_knife");
-
                         for (int i = 0; i < Config.WeaponsList.Count; i++)
                         {
                             if (i > Config.WeaponsList.Count) break;
@@ -162,15 +191,8 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
                         pl.Clan = Config.ScoreBoardTag;                     // ok
 
                     //if (Config.EnableBunnyHop)
-                    //{
-                    //    if (pl.Buttons == PlayerButtons.Jump && PlayerFlags.FL_ONGROUND != 0)
-                    //    {
-                    //        Server.NextFrame(() =>
-                    //        {
+                    //    SetupBhop(pl);
 
-                    //        });
-                    //    }
-                    //}
                 });
             }
 
