@@ -11,6 +11,7 @@ using System.Data;
 using System.Numerics;
 using System.Text.Json.Serialization;
 using static CounterStrikeSharp.API.Core.Listeners;
+using CounterStrikeSharp.API.Modules.Cvars;
 
 namespace NightVip;
 
@@ -25,15 +26,12 @@ public class NightVipConfig : BasePluginConfig
     [JsonPropertyName("Money")] public int Money { get; set; } = 16000;
     [JsonPropertyName("Gravity")] public float Gravity { get; set; } = 1.0f;
     [JsonPropertyName("AutoGiveVip")] public bool AutoGiveVip { get; set; } = true;
-
-    //[JsonPropertyName("EnableBunnyHop")] public bool EnableBunnyHop { get; set; } = true;
-
     [JsonPropertyName("GiveHealthShot")] public bool GiveHealthShot { get; set; } = true;
-    [JsonPropertyName("GivePlayerItem")] public bool GivePlayerItem { get; set; } = true;
+    [JsonPropertyName("GivePlayerWeapons")] public bool GivePlayerWeapons { get; set; } = true;
     [JsonPropertyName("WeaponsList")] public List<string?> WeaponsList { get; set; } = new List<string?> { "weapon_ak47", "weapon_deagle" };
 }
 
-[MinimumApiVersion(116)]
+[MinimumApiVersion(126)]
 public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 {
     public override string ModuleName => "NightVip";
@@ -41,16 +39,17 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
     public override string ModuleAuthor => "jockii";
 
     public List<int?> _vips = new List<int?>();
-    public int Round = 0;
 
     public NightVipConfig Config { get; set; } = new NightVipConfig();
+
     public void OnConfigParsed(NightVipConfig config)
     {
         Config = config;
     }
+
     public override void Load(bool hotReload)
     {
-        if(Config.AutoGiveVip)
+        if (Config.AutoGiveVip)
             RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
 
         Console.WriteLine($"##########################################\n" +
@@ -66,29 +65,6 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
         });
     }
 
-    private string TimeNow(string time)
-    {
-        int i = time.IndexOf('.');
-
-        if (i != -1)
-        {
-            time = time.Substring(0, i);
-        }
-        return time;
-    }
-
-    //private void SetupBhop(CCSPlayerController player)
-    //{
-    //    if (player == null || !player.IsValid || player.IsBot || player.IsHLTV || !player.PlayerPawn.IsValid)
-    //        return;
-    //    else
-    //    {
-    //        Server.ExecuteCommand("sv_cheats true");
-    //        player.ExecuteClientCommand("sv_autobunnyhopping true");
-    //        Server.ExecuteCommand("sv_cheats false");
-    //    }
-    //}
-
     private void GiveWeaponItem(CCSPlayerController pl, string item)
     {
         if (item == null || item == "") return;
@@ -99,7 +75,7 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
     {
         CCSPlayerController player = @event.Userid;
 
-        if (player == null || !player.IsValid || player.IsBot || player.IsHLTV || !player.PlayerPawn.IsValid) 
+        if (player == null || !player.IsValid || player.IsBot || player.IsHLTV || !player.PlayerPawn.IsValid)
             return HookResult.Continue;
         else
             _vips.Add(player.UserId);
@@ -117,7 +93,7 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
         TimeSpan.TryParse(Config.PluginStartTime, out TimeSpan start_time);
         TimeSpan.TryParse(Config.PluginEndTime, out TimeSpan end_time);
-        TimeSpan.TryParse(TimeNow(DateTime.Now.TimeOfDay.ToString()), out TimeSpan current_time);
+        TimeSpan.TryParse(DateTime.Now.ToString("HH:mm:ss"), out TimeSpan current_time);
 
         if (start_time <= current_time || current_time < end_time)
         {
@@ -159,7 +135,7 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
         TimeSpan.TryParse(Config.PluginStartTime, out TimeSpan start_time);
         TimeSpan.TryParse(Config.PluginEndTime, out TimeSpan end_time);
-        TimeSpan.TryParse(TimeNow(DateTime.Now.TimeOfDay.ToString()), out TimeSpan current_time);
+        TimeSpan.TryParse(DateTime.Now.ToString("HH:mm:ss"), out TimeSpan current_time);
 
         if (start_time <= current_time || current_time < end_time)
         {
@@ -169,7 +145,7 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
             {
                 AddTimer(1.0f, () =>
                 {
-                    if (Config.GivePlayerItem)
+                    if (Config.GivePlayerWeapons)
                     {
                         for (int i = 0; i < Config.WeaponsList.Count; i++)
                         {
@@ -185,14 +161,10 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
                     pl.Pawn.Value.GravityScale = Config.Gravity;            // ok
 
                     if (Config.GiveHealthShot)
-                        pl.GiveNamedItem("weapon_healthshot");              // vrodi ok
+                        pl.GiveNamedItem("weapon_healthshot");              // ok
 
                     if (Config.UseScoreBoardTag)
                         pl.Clan = Config.ScoreBoardTag;                     // ok
-
-                    //if (Config.EnableBunnyHop)
-                    //    SetupBhop(pl);
-
                 });
             }
 
