@@ -20,11 +20,14 @@ public class NightVipConfig : BasePluginConfig
     [JsonPropertyName("PluginStartTime")] public string PluginStartTime { get; set; } = "20:00:00";
     [JsonPropertyName("PluginEndTime")] public string PluginEndTime { get; set; } = "06:00:00";
     [JsonPropertyName("AutoGiveVip")] public bool AutoGiveVip { get; set; } = true;
+
     //[JsonPropertyName("EnableAutoBhop")] public bool EnableAutoBhop { get; set; } = true;
+
     [JsonPropertyName("GiveHealthShot")] public bool GiveHealthShot { get; set; } = true;
     [JsonPropertyName("GivePlayerWeapons")] public bool GivePlayerWeapons { get; set; } = true;
     [JsonPropertyName("UseScoreBoardTag")] public bool UseScoreBoardTag { get; set; } = true;
     [JsonPropertyName("ScoreBoardTag")] public string ScoreBoardTag { get; set; } = "[NightVip]";
+    [JsonPropertyName("DisableVipRounds")] public string DisableVipRounds { get; set; } = "1,13";
     [JsonPropertyName("Health")] public int Health { get; set; } = 100;
     [JsonPropertyName("Armor")] public int Armor { get; set; } = 100;
     [JsonPropertyName("Money")] public int Money { get; set; } = 16000;
@@ -36,10 +39,14 @@ public class NightVipConfig : BasePluginConfig
 public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 {
     public override string ModuleName => "NightVip";
-    public override string ModuleVersion => "v1.2.0";
+    public override string ModuleVersion => "v1.3.0";
     public override string ModuleAuthor => "jockii";
 
     public static List<int?> _vips = new List<int?>();
+
+    public static List<int> _noVipsRounds = new List<int>();
+
+    public int _round = 0;
 
     public NightVipConfig Config { get; set; } = new NightVipConfig();
 
@@ -66,6 +73,23 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
             return HookResult.Continue;
         });
+
+        RegisterEventHandler<EventRoundEnd>((@event, info) =>
+        {
+            _round++;
+
+            return HookResult.Continue;
+        });
+
+
+        // for no vip rounds
+        string[] _ = Config.DisableVipRounds.Split(',');
+
+        foreach (var item in _)
+        {
+            int itemInteger = Convert.ToInt32(item);
+            _noVipsRounds.Add(itemInteger);
+        }
     }
 
     private void GiveWeaponItem(CCSPlayerController pl, string item)
@@ -74,24 +98,24 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
         else pl.GiveNamedItem(item);
     }
 
-    private void Bhop(CCSPlayerController pl)
-    {
-        if (!pl.PawnIsAlive) return;
+    //private void Bhop(CCSPlayerController pl)
+    //{
+    //    if (!pl.PawnIsAlive) return;
 
-        if (!_vips.Contains(pl.UserId))
-            return;
+    //    if (!_vips.Contains(pl.UserId))
+    //        return;
 
-        if (_vips.Contains(pl.UserId))
-        {
-            var pawn = pl.Pawn.Value;
-            var flags = (PlayerFlags)pawn!.Flags;
-            var client = pl.Index;
-            var buttons = pl.Buttons;
+    //    if (_vips.Contains(pl.UserId))
+    //    {
+    //        var pawn = pl.Pawn.Value;
+    //        var flags = (PlayerFlags)pawn!.Flags;
+    //        var client = pl.Index;
+    //        var buttons = pl.Buttons;
 
-            if ((flags & PlayerFlags.FL_ONGROUND) != 0 && (buttons & PlayerButtons.Jump) != 0)
-                pawn!.AbsVelocity.Z = 280;
-        }
-    }
+    //        if ((flags & PlayerFlags.FL_ONGROUND) != 0 && (buttons & PlayerButtons.Jump) != 0)
+    //            pawn!.AbsVelocity.Z = 280;
+    //    }
+    //}
 
     private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
     {
@@ -165,6 +189,8 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
             if (_vips.Contains(pl.UserId))
             {
+                if (_noVipsRounds.Contains(_round)) return HookResult.Continue;
+
                 AddTimer(1.0f, () =>
                 {
                     if (Config.GivePlayerWeapons)
@@ -176,17 +202,17 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
                         }
                     }
 
-                    pl.Pawn.Value!.Health = Config.Health;                  // ok
-                    pl.PlayerPawn.Value!.ArmorValue = Config.Armor;         // ok
-                    pl.PawnHasHelmet = true;                                // ok
-                    pl.InGameMoneyServices!.Account = Config.Money;         // ok
-                    pl.Pawn.Value.GravityScale = Config.Gravity;            // ok
+                    pl.Pawn.Value!.Health = Config.Health;
+                    pl.PlayerPawn.Value!.ArmorValue = Config.Armor;
+                    pl.PawnHasHelmet = true;
+                    pl.InGameMoneyServices!.Account = Config.Money;
+                    pl.Pawn.Value.GravityScale = Config.Gravity;
 
                     if (Config.GiveHealthShot)
-                        pl.GiveNamedItem("weapon_healthshot");              // ok
+                        pl.GiveNamedItem("weapon_healthshot");
 
                     if (Config.UseScoreBoardTag)
-                        pl.Clan = Config.ScoreBoardTag;                     // ok
+                        pl.Clan = Config.ScoreBoardTag;
                 });
             }
 
