@@ -20,11 +20,14 @@ public class NightVipConfig : BasePluginConfig
     [JsonPropertyName("PluginStartTime")] public string PluginStartTime { get; set; } = "20:00:00";
     [JsonPropertyName("PluginEndTime")] public string PluginEndTime { get; set; } = "06:00:00";
     [JsonPropertyName("AutoGiveVip")] public bool AutoGiveVip { get; set; } = true;
+
     //[JsonPropertyName("EnableAutoBhop")] public bool EnableAutoBhop { get; set; } = true;
+
     [JsonPropertyName("GiveHealthShot")] public bool GiveHealthShot { get; set; } = true;
     [JsonPropertyName("GivePlayerWeapons")] public bool GivePlayerWeapons { get; set; } = true;
     [JsonPropertyName("UseScoreBoardTag")] public bool UseScoreBoardTag { get; set; } = true;
     [JsonPropertyName("ScoreBoardTag")] public string ScoreBoardTag { get; set; } = "[NightVip]";
+    [JsonPropertyName("DisableVipRounds")] public string DisableVipRounds { get; set; } = "1,13";
     [JsonPropertyName("Health")] public int Health { get; set; } = 100;
     [JsonPropertyName("Armor")] public int Armor { get; set; } = 100;
     [JsonPropertyName("Money")] public int Money { get; set; } = 16000;
@@ -40,6 +43,8 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
     public override string ModuleAuthor => "jockii";
 
     public static List<int?> _vips = new List<int?>();
+
+    public static List<int> _noVipsRounds = new List<int>();
 
     public int _round = 0;
 
@@ -75,6 +80,16 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
             return HookResult.Continue;
         });
+
+
+        // for no vip rounds
+        string[] _ = Config.DisableVipRounds.Split(',');
+
+        foreach (var item in _)
+        {
+            int itemInteger = Convert.ToInt32(item);
+            _noVipsRounds.Add(itemInteger);
+        }
     }
 
     private void GiveWeaponItem(CCSPlayerController pl, string item)
@@ -83,24 +98,24 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
         else pl.GiveNamedItem(item);
     }
 
-    private void Bhop(CCSPlayerController pl)
-    {
-        if (!pl.PawnIsAlive) return;
+    //private void Bhop(CCSPlayerController pl)
+    //{
+    //    if (!pl.PawnIsAlive) return;
 
-        if (!_vips.Contains(pl.UserId))
-            return;
+    //    if (!_vips.Contains(pl.UserId))
+    //        return;
 
-        if (_vips.Contains(pl.UserId))
-        {
-            var pawn = pl.Pawn.Value;
-            var flags = (PlayerFlags)pawn!.Flags;
-            var client = pl.Index;
-            var buttons = pl.Buttons;
+    //    if (_vips.Contains(pl.UserId))
+    //    {
+    //        var pawn = pl.Pawn.Value;
+    //        var flags = (PlayerFlags)pawn!.Flags;
+    //        var client = pl.Index;
+    //        var buttons = pl.Buttons;
 
-            if ((flags & PlayerFlags.FL_ONGROUND) != 0 && (buttons & PlayerButtons.Jump) != 0)
-                pawn!.AbsVelocity.Z = 280;
-        }
-    }
+    //        if ((flags & PlayerFlags.FL_ONGROUND) != 0 && (buttons & PlayerButtons.Jump) != 0)
+    //            pawn!.AbsVelocity.Z = 280;
+    //    }
+    //}
 
     private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
     {
@@ -174,11 +189,7 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
             if (_vips.Contains(pl.UserId))
             {
-                var mp_maxrounds = ConVar.Find("mp_maxrounds");
-                var max_rounds = mp_maxrounds?.GetPrimitiveValue<int>();
-                var half_rounds = max_rounds / 2 + 1;
-
-                if (_round == 1 || _round == half_rounds) return HookResult.Continue;
+                if (_noVipsRounds.Contains(_round)) return HookResult.Continue;
 
                 AddTimer(1.0f, () =>
                 {
