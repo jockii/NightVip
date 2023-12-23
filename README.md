@@ -20,7 +20,7 @@ addons/counterstrikesharp/configs/plugins/NightVip/NightVip.json
 "Health": 100,                    //  Amount hp
 "Armor": 100,                     //  Amount armor(+helmet)
 "Money": 16000,                   //  Amount money(when player spawned)
-"Gravity": 0.8,                   //  Gravity... (default 0.7)
+"Gravity": 0.8,                   //  Gravity... (default 1.0)
 "GiveHealthShot": true,           //  give player healthshot?
 "GivePlayerItem": true,           // give weapon in list:
 "WeaponsList": [
