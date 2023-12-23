@@ -42,7 +42,8 @@ Follow the data entry formats from the config example.
 - [x] Issuance of weapons (specify which one) 
 - [ ] Bunnyhop
 - [ ] Jump count
-- [ ] Maybe something else
+- [x] Auto give vip
+- [x] Disable vip in "X" round
 ### `Note`
 The plugin has not been tested properly due to the lack of a large number of people. If you find any bugs or errors please let me know. Thank you.
 ### `Support`
