@@ -36,10 +36,12 @@ public class NightVipConfig : BasePluginConfig
 public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 {
     public override string ModuleName => "NightVip";
-    public override string ModuleVersion => "v1.2.0";
+    public override string ModuleVersion => "v1.3.0";
     public override string ModuleAuthor => "jockii";
 
     public static List<int?> _vips = new List<int?>();
+
+    public int _round = 0;
 
     public NightVipConfig Config { get; set; } = new NightVipConfig();
 
@@ -63,6 +65,13 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
             
             if (_vips.Contains(pl.UserId))
                 _vips.Remove(pl.UserId);
+
+            return HookResult.Continue;
+        });
+
+        RegisterEventHandler<EventRoundEnd>((@event, info) =>
+        {
+            _round++;
 
             return HookResult.Continue;
         });
@@ -165,6 +174,12 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
             if (_vips.Contains(pl.UserId))
             {
+                var mp_maxrounds = ConVar.Find("mp_maxrounds");
+                var max_rounds = mp_maxrounds?.GetPrimitiveValue<int>();
+                var half_rounds = max_rounds / 2 + 1;
+
+                if (_round == 1 || _round == half_rounds) return HookResult.Continue;
+
                 AddTimer(1.0f, () =>
                 {
                     if (Config.GivePlayerWeapons)
@@ -176,17 +191,17 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
                         }
                     }
 
-                    pl.Pawn.Value!.Health = Config.Health;                  // ok
-                    pl.PlayerPawn.Value!.ArmorValue = Config.Armor;         // ok
-                    pl.PawnHasHelmet = true;                                // ok
-                    pl.InGameMoneyServices!.Account = Config.Money;         // ok
-                    pl.Pawn.Value.GravityScale = Config.Gravity;            // ok
+                    pl.Pawn.Value!.Health = Config.Health;
+                    pl.PlayerPawn.Value!.ArmorValue = Config.Armor;
+                    pl.PawnHasHelmet = true;
+                    pl.InGameMoneyServices!.Account = Config.Money;
+                    pl.Pawn.Value.GravityScale = Config.Gravity;
 
                     if (Config.GiveHealthShot)
-                        pl.GiveNamedItem("weapon_healthshot");              // ok
+                        pl.GiveNamedItem("weapon_healthshot");
 
                     if (Config.UseScoreBoardTag)
-                        pl.Clan = Config.ScoreBoardTag;                     // ok
+                        pl.Clan = Config.ScoreBoardTag;
                 });
             }
 
