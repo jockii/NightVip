@@ -19,15 +19,16 @@ public class NightVipConfig : BasePluginConfig
 {
     [JsonPropertyName("PluginStartTime")] public string PluginStartTime { get; set; } = "20:00:00";
     [JsonPropertyName("PluginEndTime")] public string PluginEndTime { get; set; } = "06:00:00";
-    [JsonPropertyName("ScoreBoardTag")] public string ScoreBoardTag { get; set; } = "[NightVip]";
+    [JsonPropertyName("AutoGiveVip")] public bool AutoGiveVip { get; set; } = true;
+    //[JsonPropertyName("EnableAutoBhop")] public bool EnableAutoBhop { get; set; } = true;
+    [JsonPropertyName("GiveHealthShot")] public bool GiveHealthShot { get; set; } = true;
+    [JsonPropertyName("GivePlayerWeapons")] public bool GivePlayerWeapons { get; set; } = true;
     [JsonPropertyName("UseScoreBoardTag")] public bool UseScoreBoardTag { get; set; } = true;
+    [JsonPropertyName("ScoreBoardTag")] public string ScoreBoardTag { get; set; } = "[NightVip]";
     [JsonPropertyName("Health")] public int Health { get; set; } = 100;
     [JsonPropertyName("Armor")] public int Armor { get; set; } = 100;
     [JsonPropertyName("Money")] public int Money { get; set; } = 16000;
     [JsonPropertyName("Gravity")] public float Gravity { get; set; } = 1.0f;
-    [JsonPropertyName("AutoGiveVip")] public bool AutoGiveVip { get; set; } = true;
-    [JsonPropertyName("GiveHealthShot")] public bool GiveHealthShot { get; set; } = true;
-    [JsonPropertyName("GivePlayerWeapons")] public bool GivePlayerWeapons { get; set; } = true;
     [JsonPropertyName("WeaponsList")] public List<string?> WeaponsList { get; set; } = new List<string?> { "weapon_ak47", "weapon_deagle" };
 }
 
@@ -38,7 +39,7 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
     public override string ModuleVersion => "v1.2.0";
     public override string ModuleAuthor => "jockii";
 
-    public List<int?> _vips = new List<int?>();
+    public static List<int?> _vips = new List<int?>();
 
     public NightVipConfig Config { get; set; } = new NightVipConfig();
 
@@ -59,7 +60,9 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
         RegisterEventHandler<EventPlayerDisconnect>((@event, info) =>
         {
             var pl = @event.Userid;
-            _vips.Remove(pl.UserId);
+            
+            if (_vips.Contains(pl.UserId))
+                _vips.Remove(pl.UserId);
 
             return HookResult.Continue;
         });
@@ -69,6 +72,25 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
     {
         if (item == null || item == "") return;
         else pl.GiveNamedItem(item);
+    }
+
+    private void Bhop(CCSPlayerController pl)
+    {
+        if (!pl.PawnIsAlive) return;
+
+        if (!_vips.Contains(pl.UserId))
+            return;
+
+        if (_vips.Contains(pl.UserId))
+        {
+            var pawn = pl.Pawn.Value;
+            var flags = (PlayerFlags)pawn!.Flags;
+            var client = pl.Index;
+            var buttons = pl.Buttons;
+
+            if ((flags & PlayerFlags.FL_ONGROUND) != 0 && (buttons & PlayerButtons.Jump) != 0)
+                pawn!.AbsVelocity.Z = 280;
+        }
     }
 
     private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
@@ -172,7 +194,10 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
         }
         else
         {
-            return HookResult.Continue;
+            if (_vips.Count > 0)
+                _vips.Clear();
+            else
+                return HookResult.Continue;
         }
 
         return HookResult.Continue;
