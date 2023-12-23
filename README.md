@@ -1,5 +1,5 @@
-![Static Badge](https://img.shields.io/badge/ver-1.1.0-darkgreen)
-![Static Badge](https://img.shields.io/badge/CSSharp-v116%2B-purple)
+![Static Badge](https://img.shields.io/badge/ver-1.3.0-darkgreen)
+![Static Badge](https://img.shields.io/badge/CSSharp-v130%2B-purple)
 ## `About`
 Plugin gives player basic VIP privileges, but for a certain period of time.
 The following are currently available:
@@ -13,25 +13,23 @@ The following are currently available:
 ### `Config`
 addons/counterstrikesharp/configs/plugins/NightVip/NightVip.json
 ```json
-"PluginStartTime": "20:00:00",    //  time until 24h | format: HH:MM:SS
-"PluginEndTime": "06:00:00",      //  time after 24h | format: HH:MM:SS
-"ScoreBoardTag": "[NightVip]",    //  tag in scoreboard
-"UseScoreBoardTag": true,         //  use this tag?
-"Health": 100,                    //  Amount hp
-"Armor": 100,                     //  Amount armor(+helmet)
-"Money": 16000,                   //  Amount money(when player spawned)
-"Gravity": 0.8,                   //  Gravity... (default 1.0)
-"GiveHealthShot": true,           //  give player healthshot?
-"GivePlayerItem": true,           // give weapon in list:
-"WeaponsList": [
-    "weapon_ak47",
-    "weapon_deagle",
-    "weapon_hegrenade",
-    "weapon_molotov",
-    "weapon_smokegrenade",
-    "weapon_flashbang"
-  ]
-"ConfigVersion": 1                //  non uses
+  "PluginStartTime": "20:00:00",        // time until 24h | format HH:mm:ss
+  "PluginEndTime": "06:00:00",          // time after 24h | format HH:mm:ss
+  "AutoGiveVip": true,                  // Auto give vip to player
+  "GiveHealthShot": true,               // Give healthshot?
+  "GivePlayerWeapons": true,            // Give weapons to player in list?
+  "UseScoreBoardTag": true,             // Use tag in "TAB" ?
+  "ScoreBoardTag": "[NightVip]",        // Tag name
+  "DisableVipRounds": "1,13",           // Disable vip in "X" rounds (1,2,3 ...)
+  "Health": 100,                        // Amount health
+  "Armor": 100,                         // Amount armor
+  "Money": 16000,                       // Amount money (on spawn)
+  "Gravity": 1,                         // Player gravity (default: 1.0 | custome: 0.7, 0.3 ...)
+  "WeaponsList": [                      // Weapons list (weapon_nameweapon) 
+    "weapon_ak47",                      // ak47
+    "weapon_deagle"                     // desert eagle
+  ],
+  "ConfigVersion": 1                    // don`t touch it
 ```
 Follow the data entry formats from the config example.
 ### `Commands`
