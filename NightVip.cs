@@ -30,10 +30,14 @@ public class NightVipConfig : BasePluginConfig
     [JsonPropertyName("GiveHealthShot")] public bool GiveHealthShot { get; set; } = true;
     [JsonPropertyName("GivePlayerWeapons")] public bool GivePlayerWeapons { get; set; } = true;
     [JsonPropertyName("UseScoreBoardTag")] public bool UseScoreBoardTag { get; set; } = true;
-    [JsonPropertyName("EnableJumpCount")] public bool EnableJumpCount { get; set; } = true;
+
+    //[JsonPropertyName("EnableJumpCount")] public bool EnableJumpCount { get; set; } = true;
+
     [JsonPropertyName("ScoreBoardTag")] public string ScoreBoardTag { get; set; } = "[NightVip]";
     [JsonPropertyName("DisableVipRounds")] public string DisableVipRounds { get; set; } = "1,13";
-    [JsonPropertyName("JumpCount")] public int JumpCount { get; set; } = 2;
+
+    //[JsonPropertyName("JumpCount")] public int JumpCount { get; set; } = 2;
+
     [JsonPropertyName("Health")] public int Health { get; set; } = 100;
     [JsonPropertyName("Armor")] public int Armor { get; set; } = 100;
     [JsonPropertyName("Money")] public int Money { get; set; } = 16000;
@@ -51,6 +55,8 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
     public static List<int?> _vips = new List<int?>();
 
     public static List<int> _noVipsRounds = new List<int>();
+
+    private static Dictionary<gear_slot_t, uint> _constslot = new Dictionary<gear_slot_t, uint>();
 
     public static Dictionary<CCSPlayerController, int> _jumps = new Dictionary<CCSPlayerController, int>();
 
@@ -111,7 +117,11 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
             _noVipsRounds.Add(itemInteger);
         }
 
-        AddTimer(2.0f, () => { CreateDictWeaponsNameSlot(); });
+        AddTimer(2.0f, () => 
+        { 
+            CreateDictWeaponsNameSlot();
+            CreateConstGearSlots();
+        });
     }
 
     private Dictionary<string, int> CreateDictWeaponsNameSlot()
@@ -164,6 +174,32 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
         return _weaponslot;
     }
 
+    private Dictionary<gear_slot_t, uint> CreateConstGearSlots()
+    {
+        _constslot = new Dictionary<gear_slot_t, uint>
+        {
+            { gear_slot_t.GEAR_SLOT_FIRST,              0},
+            { gear_slot_t.GEAR_SLOT_RIFLE,              0},
+            { gear_slot_t.GEAR_SLOT_PISTOL,             1},
+            { gear_slot_t.GEAR_SLOT_KNIFE,              2},
+            { gear_slot_t.GEAR_SLOT_GRENADES,           3},
+            { gear_slot_t.GEAR_SLOT_C4,                 4},
+            { gear_slot_t.GEAR_SLOT_BOOSTS,             11},
+            { gear_slot_t.GEAR_SLOT_LAST,               12},
+            { gear_slot_t.GEAR_SLOT_COUNT,              13},
+            { gear_slot_t.GEAR_SLOT_UTILITY,            12},
+            { gear_slot_t.GEAR_SLOT_INVALID,    4294967295},
+            { gear_slot_t.GEAR_SLOT_RESERVED_SLOT6,      5},
+            { gear_slot_t.GEAR_SLOT_RESERVED_SLOT7,      6},
+            { gear_slot_t.GEAR_SLOT_RESERVED_SLOT8,      7},
+            { gear_slot_t.GEAR_SLOT_RESERVED_SLOT9,      8},
+            { gear_slot_t.GEAR_SLOT_RESERVED_SLOT10,     9},
+            { gear_slot_t.GEAR_SLOT_RESERVED_SLOT11,    10},
+        };
+
+        return _constslot;
+    }
+
     private void GiveWeaponItem(CCSPlayerController pl, string item)
     {
         if (item == null || item == "")
@@ -173,9 +209,11 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
         var weapons = pl.PlayerPawn.Value?.WeaponServices;
 
+        Dictionary<string, bool> playerActiveSlots = new Dictionary<string, bool>();
+
         foreach (var weapon in weapons!.MyWeapons)
         {
-            if (weapon == null) continue;
+            if (weapon == null || !weapon.IsValid || !weapon.Value!.IsValid) continue;
 
             if (itemSlot > 3) continue;
 
@@ -183,47 +221,10 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
             if (_weapon == null) continue;
 
-            if (_weapon.GearSlot == gear_slot_t.GEAR_SLOT_RIFLE && _weapon.GearSlot == (gear_slot_t)itemSlot)
-            {
-
-            }
-
-            if (_weapon.GearSlot == gear_slot_t.GEAR_SLOT_PISTOL && _weapon.GearSlot == (gear_slot_t)itemSlot)
-            {
-
-            }
-
-            if (_weapon.GearSlot == gear_slot_t.GEAR_SLOT_KNIFE && _weapon.GearSlot == (gear_slot_t)itemSlot)
-            {
-
-            }
-
-            if (_weapon.GearSlot == gear_slot_t.GEAR_SLOT_GRENADES && _weapon.GearSlot == (gear_slot_t)itemSlot)
-            {
-
-            }
+            
         }
         //CCSWeaponBaseVData? _weapon = weapon?.Value?.As<CCSWeaponBase>().VData;
     }
-
-    //private void Bhop(CCSPlayerController pl) // try EventPlayerJump
-    //{
-    //    if (!pl.PawnIsAlive) return;
-
-    //    if (!_vips.Contains(pl.UserId))
-    //        return;
-
-    //    if (_vips.Contains(pl.UserId))
-    //    {
-    //        var pawn = pl.Pawn.Value;
-    //        var flags = (PlayerFlags)pawn!.Flags;
-    //        var client = pl.Index;
-    //        var buttons = pl.Buttons;
-
-    //        if ((flags & PlayerFlags.FL_ONGROUND) != 0 && (buttons & PlayerButtons.Jump) != 0)
-    //            pawn!.AbsVelocity.Z = 280;
-    //    }
-    //}
 
     private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
     {
