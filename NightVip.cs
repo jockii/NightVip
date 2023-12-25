@@ -209,7 +209,7 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
         var weapons = pl.PlayerPawn.Value?.WeaponServices;
 
-        Dictionary<string, bool> playerActiveSlots = new Dictionary<string, bool>();
+        Dictionary<string, gear_slot_t> playerActiveSlots = new Dictionary<string, gear_slot_t>();
 
         foreach (var weapon in weapons!.MyWeapons)
         {
@@ -221,9 +221,28 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
             if (_weapon == null) continue;
 
-            
+            playerActiveSlots.Add(_weapon.Name, _weapon.GearSlot);
         }
-        //CCSWeaponBaseVData? _weapon = weapon?.Value?.As<CCSWeaponBase>().VData;
+        
+        foreach (var slot in playerActiveSlots)
+        {
+            if (slot.Key == item && slot.Value != gear_slot_t.GEAR_SLOT_GRENADES)
+                continue;
+
+            if (slot.Key == item && slot.Value == gear_slot_t.GEAR_SLOT_GRENADES)
+            {
+                if (slot.Value == (gear_slot_t)itemSlot)
+                {
+                    if (slot.Key != item)
+                        pl.GiveNamedItem(item);
+                    else
+                        continue;
+                }
+            }
+
+            if (!playerActiveSlots.ContainsKey(item))
+                pl.GiveNamedItem(item);
+        }
     }
 
     private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
