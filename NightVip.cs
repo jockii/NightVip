@@ -131,7 +131,6 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
             { "weapon_glock",               1 },
             { "weapon_hkp2000",             1 },
             { "weapon_usp_silencer",        1 },
-            { "weapon_usp_silencer",        1 },
             { "weapon_p250",                1 },
             { "weapon_tec9",                1 },
             { "weapon_cz75a",               1 },
@@ -179,13 +178,11 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
         _constslot = new Dictionary<gear_slot_t, uint>
         {
             { gear_slot_t.GEAR_SLOT_FIRST,              0},
-            { gear_slot_t.GEAR_SLOT_RIFLE,              0},
             { gear_slot_t.GEAR_SLOT_PISTOL,             1},
             { gear_slot_t.GEAR_SLOT_KNIFE,              2},
             { gear_slot_t.GEAR_SLOT_GRENADES,           3},
             { gear_slot_t.GEAR_SLOT_C4,                 4},
             { gear_slot_t.GEAR_SLOT_BOOSTS,             11},
-            { gear_slot_t.GEAR_SLOT_LAST,               12},
             { gear_slot_t.GEAR_SLOT_COUNT,              13},
             { gear_slot_t.GEAR_SLOT_UTILITY,            12},
             { gear_slot_t.GEAR_SLOT_INVALID,    4294967295},
