@@ -1,4 +1,4 @@
-![Static Badge](https://img.shields.io/badge/ver-1.3.0-darkgreen)
+![Static Badge](https://img.shields.io/badge/ver-1.4.0-darkgreen)
 ![Static Badge](https://img.shields.io/badge/CSSharp-v130%2B-purple)
 ## `About`
 Plugin gives player basic VIP privileges, but for a certain period of time.
