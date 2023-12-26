@@ -16,6 +16,7 @@ using static System.Formats.Asn1.AsnWriter;
 using System.Runtime.Intrinsics.X86;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace NightVip;
 
@@ -45,7 +46,7 @@ public class NightVipConfig : BasePluginConfig
     [JsonPropertyName("WeaponsList")] public List<string?> WeaponsList { get; set; } = new List<string?> { "weapon_ak47", "weapon_deagle" };
 }
 
-[MinimumApiVersion(126)]
+[MinimumApiVersion(130)]
 public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 {
     public override string ModuleName => "NightVip";
@@ -238,18 +239,19 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
                     else
                         pl.GiveNamedItem(item);
                 }
-                else if ((gear_slot_t)itemSlot == gear_slot_t.GEAR_SLOT_PISTOL)
-                {
-                    if(pl.PlayerPawn.Value?.WeaponServices?.Pawn.Value.DesignerName == "weapon_usp_silencer" ||
-                        pl.PlayerPawn.Value?.WeaponServices?.Pawn.Value.DesignerName == "weapon_hkp2000" ||
-                        pl.PlayerPawn.Value?.WeaponServices?.Pawn.Value.DesignerName == "weapon_glock")
-                    {
-                        pl.PlayerPawn.Value?.WeaponServices?.Pawn.Value.Remove();
-                        pl.GiveNamedItem(item);
-                    }
-                }
                 else
                     return;
+
+                //else if ((gear_slot_t)itemSlot == gear_slot_t.GEAR_SLOT_PISTOL)
+                //{
+                //    if (pl.PlayerPawn.Value?.WeaponServices?.Pawn.Value.DesignerName == "weapon_usp_silencer" ||
+                //        pl.PlayerPawn.Value?.WeaponServices?.Pawn.Value.DesignerName == "weapon_hkp2000" ||
+                //        pl.PlayerPawn.Value?.WeaponServices?.Pawn.Value.DesignerName == "weapon_glock")
+                //    {
+                //        pl.PlayerPawn.Value?.WeaponServices?.Pawn.Value.Remove();
+                //        pl.GiveNamedItem(item);
+                //    }
+                //}
             }
             else
                 pl.GiveNamedItem(item);
