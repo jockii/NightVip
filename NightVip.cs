@@ -12,6 +12,10 @@ using System.Numerics;
 using System.Text.Json.Serialization;
 using static CounterStrikeSharp.API.Core.Listeners;
 using CounterStrikeSharp.API.Modules.Cvars;
+using static System.Formats.Asn1.AsnWriter;
+using System.Runtime.Intrinsics.X86;
+using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 
 namespace NightVip;
 
@@ -26,8 +30,14 @@ public class NightVipConfig : BasePluginConfig
     [JsonPropertyName("GiveHealthShot")] public bool GiveHealthShot { get; set; } = true;
     [JsonPropertyName("GivePlayerWeapons")] public bool GivePlayerWeapons { get; set; } = true;
     [JsonPropertyName("UseScoreBoardTag")] public bool UseScoreBoardTag { get; set; } = true;
+
+    //[JsonPropertyName("EnableJumpCount")] public bool EnableJumpCount { get; set; } = true;
+
     [JsonPropertyName("ScoreBoardTag")] public string ScoreBoardTag { get; set; } = "[NightVip]";
     [JsonPropertyName("DisableVipRounds")] public string DisableVipRounds { get; set; } = "1,13";
+
+    //[JsonPropertyName("JumpCount")] public int JumpCount { get; set; } = 2;
+
     [JsonPropertyName("Health")] public int Health { get; set; } = 100;
     [JsonPropertyName("Armor")] public int Armor { get; set; } = 100;
     [JsonPropertyName("Money")] public int Money { get; set; } = 16000;
@@ -39,12 +49,18 @@ public class NightVipConfig : BasePluginConfig
 public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 {
     public override string ModuleName => "NightVip";
-    public override string ModuleVersion => "v1.3.0";
+    public override string ModuleVersion => "v1.4.0";
     public override string ModuleAuthor => "jockii";
 
     public static List<int?> _vips = new List<int?>();
 
     public static List<int> _noVipsRounds = new List<int>();
+
+    private static Dictionary<gear_slot_t, uint> _constslot = new Dictionary<gear_slot_t, uint>();
+
+    public static Dictionary<CCSPlayerController, int> _jumps = new Dictionary<CCSPlayerController, int>();
+
+    private static Dictionary<string, int> _weaponslot = new Dictionary<string, int>();
 
     public int _round = 0;
 
@@ -67,12 +83,22 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
         RegisterEventHandler<EventPlayerDisconnect>((@event, info) =>
         {
             var pl = @event.Userid;
-            
+
             if (_vips.Contains(pl.UserId))
                 _vips.Remove(pl.UserId);
 
+            if (_jumps.ContainsKey(pl))
+                _jumps.Remove(pl);
+
             return HookResult.Continue;
         });
+
+        //RegisterEventHandler<EventRoundStart>((@event, info) =>
+        //{
+        //    var players = Utilities.GetPlayers();
+
+        //    return HookResult.Continue;
+        //});
 
         RegisterEventHandler<EventRoundEnd>((@event, info) =>
         {
@@ -90,32 +116,145 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
             int itemInteger = Convert.ToInt32(item);
             _noVipsRounds.Add(itemInteger);
         }
+
+        AddTimer(2.0f, () => 
+        { 
+            CreateDictWeaponsNameSlot();
+            CreateConstGearSlots();
+        });
+    }
+
+    private Dictionary<string, int> CreateDictWeaponsNameSlot()
+    {
+        _weaponslot = new Dictionary<string, int>()
+        {
+            { "weapon_glock",               1 },
+            { "weapon_hkp2000",             1 },
+            { "weapon_usp_silencer",        1 },
+            { "weapon_p250",                1 },
+            { "weapon_tec9",                1 },
+            { "weapon_cz75a",               1 },
+            { "weapon_fiveseven",           1 },
+            { "weapon_deagle",              1 },
+            { "weapon_revolver",            1 },
+            { "weapon_mac10",               0 },
+            { "weapon_mp9",                 0 },
+            { "weapon_mp7",                 0 },
+            { "weapon_mp5sd",               0 },
+            { "weapon_ump45",               0 },
+            { "weapon_p90",                 0 },
+            { "weapon_bizon",               0 },
+            { "weapon_nova",                0 },
+            { "weapon_xm1014",              0 },
+            { "weapon_sawedoff",            0 },
+            { "weapon_mag7",                0 },
+            { "weapon_m249",                0 },
+            { "weapon_negev",               0 },
+            { "weapon_galil",               0 },
+            { "weapon_famas",               0 },
+            { "weapon_ak47",                0 },
+            { "weapon_m4a1",                0 },
+            { "weapon_m4a1_silencer",       0 },
+            { "weapon_ssg08",               0 },
+            { "weapon_sg556",               0 },
+            { "weapon_aug",                 0 },
+            { "weapon_awp",                 0 },
+            { "weapon_g3sg1",               0 },
+            { "weapon_scar20",              0 },
+            { "weapon_taser",               2 },
+            { "weapon_molotov",             3 },
+            { "weapon_incgrenade",          3 },
+            { "weapon_decoy",               3 },
+            { "weapon_flashbang",           3 },
+            { "weapon_hegrenade",           3 },
+            { "weapon_smokegrenade",        3 }
+        };
+
+        return _weaponslot;
+    }
+
+    private Dictionary<gear_slot_t, uint> CreateConstGearSlots()
+    {
+        _constslot = new Dictionary<gear_slot_t, uint>
+        {
+            { gear_slot_t.GEAR_SLOT_FIRST,              0},
+            { gear_slot_t.GEAR_SLOT_PISTOL,             1},
+            { gear_slot_t.GEAR_SLOT_KNIFE,              2},
+            { gear_slot_t.GEAR_SLOT_GRENADES,           3},
+            { gear_slot_t.GEAR_SLOT_C4,                 4},
+            { gear_slot_t.GEAR_SLOT_BOOSTS,             11},
+            { gear_slot_t.GEAR_SLOT_COUNT,              13},
+            { gear_slot_t.GEAR_SLOT_UTILITY,            12},
+            { gear_slot_t.GEAR_SLOT_INVALID,    4294967295},
+            { gear_slot_t.GEAR_SLOT_RESERVED_SLOT6,      5},
+            { gear_slot_t.GEAR_SLOT_RESERVED_SLOT7,      6},
+            { gear_slot_t.GEAR_SLOT_RESERVED_SLOT8,      7},
+            { gear_slot_t.GEAR_SLOT_RESERVED_SLOT9,      8},
+            { gear_slot_t.GEAR_SLOT_RESERVED_SLOT10,     9},
+            { gear_slot_t.GEAR_SLOT_RESERVED_SLOT11,    10},
+        };
+
+        return _constslot;
     }
 
     private void GiveWeaponItem(CCSPlayerController pl, string item)
     {
-        if (item == null || item == "") return;
-        else pl.GiveNamedItem(item);
+        if (item == null || item == "")
+            return;
+
+        int itemSlot = _weaponslot[item];
+
+        var weapons = pl.PlayerPawn.Value?.WeaponServices;
+
+        Dictionary<string, gear_slot_t> playerActiveSlots = new Dictionary<string, gear_slot_t>();
+
+        foreach (var weapon in weapons!.MyWeapons)
+        {
+            if (weapon == null || !weapon.IsValid || !weapon.Value!.IsValid) continue;
+
+            if (itemSlot > 3) continue;
+
+            CCSWeaponBaseVData? _weapon = weapon?.Value?.As<CCSWeaponBase>().VData;
+
+            if (_weapon == null) continue;
+
+            playerActiveSlots.Add(_weapon.Name, _weapon.GearSlot);
+        }
+
+        if (!_weaponslot.ContainsKey(item))
+            return;
+
+        if (playerActiveSlots.ContainsKey(item))
+           return;
+
+        if (!playerActiveSlots.ContainsKey(item))
+        {
+            if (playerActiveSlots.ContainsValue((gear_slot_t)itemSlot))
+            {
+                if ((gear_slot_t)itemSlot == gear_slot_t.GEAR_SLOT_GRENADES)
+                {
+                    if (playerActiveSlots.ContainsKey(item))
+                        return;
+                    else
+                        pl.GiveNamedItem(item);
+                }
+                else if ((gear_slot_t)itemSlot == gear_slot_t.GEAR_SLOT_PISTOL)
+                {
+                    if(pl.PlayerPawn.Value?.WeaponServices?.Pawn.Value.DesignerName == "weapon_usp_silencer" ||
+                        pl.PlayerPawn.Value?.WeaponServices?.Pawn.Value.DesignerName == "weapon_hkp2000" ||
+                        pl.PlayerPawn.Value?.WeaponServices?.Pawn.Value.DesignerName == "weapon_glock")
+                    {
+                        pl.PlayerPawn.Value?.WeaponServices?.Pawn.Value.Remove();
+                        pl.GiveNamedItem(item);
+                    }
+                }
+                else
+                    return;
+            }
+            else
+                pl.GiveNamedItem(item);
+        }
     }
-
-    //private void Bhop(CCSPlayerController pl)
-    //{
-    //    if (!pl.PawnIsAlive) return;
-
-    //    if (!_vips.Contains(pl.UserId))
-    //        return;
-
-    //    if (_vips.Contains(pl.UserId))
-    //    {
-    //        var pawn = pl.Pawn.Value;
-    //        var flags = (PlayerFlags)pawn!.Flags;
-    //        var client = pl.Index;
-    //        var buttons = pl.Buttons;
-
-    //        if ((flags & PlayerFlags.FL_ONGROUND) != 0 && (buttons & PlayerButtons.Jump) != 0)
-    //            pawn!.AbsVelocity.Z = 280;
-    //    }
-    //}
 
     private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
     {
@@ -197,7 +336,9 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
                     {
                         for (int i = 0; i < Config.WeaponsList.Count; i++)
                         {
-                            if (i > Config.WeaponsList.Count) break;
+                            if (i > Config.WeaponsList.Count)
+                                break;
+
                             GiveWeaponItem(pl, Config.WeaponsList[i]!);
                         }
                     }
