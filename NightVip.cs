@@ -241,17 +241,6 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
                 }
                 else
                     return;
-
-                //else if ((gear_slot_t)itemSlot == gear_slot_t.GEAR_SLOT_PISTOL)
-                //{
-                //    if (pl.PlayerPawn.Value?.WeaponServices?.Pawn.Value.DesignerName == "weapon_usp_silencer" ||
-                //        pl.PlayerPawn.Value?.WeaponServices?.Pawn.Value.DesignerName == "weapon_hkp2000" ||
-                //        pl.PlayerPawn.Value?.WeaponServices?.Pawn.Value.DesignerName == "weapon_glock")
-                //    {
-                //        pl.PlayerPawn.Value?.WeaponServices?.Pawn.Value.Remove();
-                //        pl.GiveNamedItem(item);
-                //    }
-                //}
             }
             else
                 pl.GiveNamedItem(item);
