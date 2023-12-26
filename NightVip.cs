@@ -220,24 +220,28 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
             playerActiveSlots.Add(_weapon.Name, _weapon.GearSlot);
         }
-        
-        foreach (var slot in playerActiveSlots)
+
+        if (!_weaponslot.ContainsKey(item))
+            return;
+
+        if (playerActiveSlots.ContainsKey(item))
+           return;
+
+        if (!playerActiveSlots.ContainsKey(item))
         {
-            if (slot.Key == item && slot.Value != gear_slot_t.GEAR_SLOT_GRENADES)
-                continue;
-
-            if (slot.Key == item && slot.Value == gear_slot_t.GEAR_SLOT_GRENADES)
+            if (playerActiveSlots.ContainsValue((gear_slot_t)itemSlot))
             {
-                if (slot.Value == (gear_slot_t)itemSlot)
+                if ((gear_slot_t)itemSlot == gear_slot_t.GEAR_SLOT_GRENADES)
                 {
-                    if (slot.Key != item)
-                        pl.GiveNamedItem(item);
+                    if (playerActiveSlots.ContainsKey(item))
+                        return;
                     else
-                        continue;
+                        pl.GiveNamedItem(item);
                 }
+                else
+                    return;
             }
-
-            if (!playerActiveSlots.ContainsKey(item))
+            else
                 pl.GiveNamedItem(item);
         }
     }
