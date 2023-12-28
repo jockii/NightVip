@@ -156,13 +156,10 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
 
         // for no vip rounds
-        string[] _ = Config.DisableVipRounds.Split(',');
-
-        foreach (var item in _)
+        AddTimer(1.0f, () =>
         {
-            int itemInteger = Convert.ToInt32(item);
-            _noVipsRounds.Add(itemInteger);
-        }
+            GetNoVipsRounds();
+        });
 
         //create dictionary
         AddTimer(2.0f, () =>
@@ -170,6 +167,19 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
             CreateDictWeaponsNameSlot();
             CreateConstGearSlots();
         });
+    }
+
+    private List<int> GetNoVipsRounds()
+    {
+        string[] _rounds = Config.DisableVipRounds.Split(',');
+
+        foreach (var _round in _rounds)
+        {
+            int round = Convert.ToInt32(_round);
+            _noVipsRounds.Add(round);
+        }
+
+        return _noVipsRounds;
     }
 
     private Dictionary<string, int> CreateDictWeaponsNameSlot()
