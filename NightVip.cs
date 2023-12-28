@@ -25,9 +25,7 @@ public class NightVipConfig : BasePluginConfig
     [JsonPropertyName("PluginStartTime")] public string PluginStartTime { get; set; } = "20:00:00";
     [JsonPropertyName("PluginEndTime")] public string PluginEndTime { get; set; } = "06:00:00";
     [JsonPropertyName("AutoGiveVip")] public bool AutoGiveVip { get; set; } = true;
-
-    //[JsonPropertyName("EnableAutoBhop")] public bool EnableAutoBhop { get; set; } = true;
-
+    [JsonPropertyName("EnableAutoBhop")] public bool EnableAutoBhop { get; set; } = true;
     [JsonPropertyName("GiveHealthShot")] public bool GiveHealthShot { get; set; } = true;
     [JsonPropertyName("GivePlayerWeapons")] public bool GivePlayerWeapons { get; set; } = true;
     [JsonPropertyName("UseScoreBoardTag")] public bool UseScoreBoardTag { get; set; } = true;
@@ -50,7 +48,7 @@ public class NightVipConfig : BasePluginConfig
 public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 {
     public override string ModuleName => "NightVip";
-    public override string ModuleVersion => "v1.4.0";
+    public override string ModuleVersion => "v1.5.0";
     public override string ModuleAuthor => "jockii";
 
     public static List<int?> _vips = new List<int?>();
@@ -59,7 +57,7 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
     private static Dictionary<gear_slot_t, uint> _constslot = new Dictionary<gear_slot_t, uint>();
 
-    public static Dictionary<CCSPlayerController, int> _jumps = new Dictionary<CCSPlayerController, int>();
+    //public static Dictionary<CCSPlayerController, int> _jumps = new Dictionary<CCSPlayerController, int>();
 
     private static Dictionary<string, int> _weaponslot = new Dictionary<string, int>();
 
@@ -78,7 +76,7 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
             RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
 
         Console.WriteLine($"##########################################\n" +
-            $"Plugin: {ModuleName} {ModuleVersion}\nAuthor: {ModuleAuthor}\nInfo: https://github.com/jockii\nSupport me: https://www.buymeacoffee.com/jockii\n" +
+            $"Plugin: {ModuleName} {ModuleVersion}\nAuthor: {ModuleAuthor}\nInfo: https://github.com/jockii\nSupport me: https://buymeacoffee.com/jockii\n" +
             $"##########################################");
 
         RegisterEventHandler<EventPlayerDisconnect>((@event, info) =>
@@ -88,22 +86,70 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
             if (_vips.Contains(pl.UserId))
                 _vips.Remove(pl.UserId);
 
-            if (_jumps.ContainsKey(pl))
-                _jumps.Remove(pl);
+            //if (_jumps.ContainsKey(pl))
+            //    _jumps.Remove(pl);
 
             return HookResult.Continue;
         });
 
-        //RegisterEventHandler<EventRoundStart>((@event, info) =>
-        //{
-        //    var players = Utilities.GetPlayers();
+        RegisterEventHandler<EventRoundStart>((@event, info) =>
+        {
+            //for auto bhop
+            if (Config.EnableAutoBhop)
+            {
+                var sv_cheats = ConVar.Find("sv_cheats");
 
-        //    return HookResult.Continue;
-        //});
+                var sv_autobunnyhopping = ConVar.Find("sv_autobunnyhopping");
+
+                bool cheatsValue = sv_cheats!.GetPrimitiveValue<bool>();
+
+                bool bhopValue = sv_autobunnyhopping!.GetPrimitiveValue<bool>();
+
+                TimeSpan.TryParse(Config.PluginStartTime, out TimeSpan start_time);
+                TimeSpan.TryParse(Config.PluginEndTime, out TimeSpan end_time);
+                TimeSpan.TryParse(DateTime.Now.ToString("HH:mm:ss"), out TimeSpan current_time);
+
+                if (start_time <= current_time || current_time < end_time)
+                {
+                    if (bhopValue == false)
+                    {
+                        //enable
+                        if (cheatsValue == false)
+                            sv_cheats.SetValue(true);
+                        sv_autobunnyhopping.SetValue(true);
+                        sv_cheats.SetValue(false);
+                    }
+                    else
+                        return HookResult.Continue;
+                }
+                else
+                {
+                    if (bhopValue == true)
+                    {
+                        //disable
+                        if (cheatsValue == false)
+                            sv_cheats.SetValue(true);
+                        sv_autobunnyhopping.SetValue(false);
+                        sv_cheats.SetValue(false);
+                    }
+                    else
+                        return HookResult.Continue;
+                }
+            }
+
+            return HookResult.Continue;
+        });
 
         RegisterEventHandler<EventRoundEnd>((@event, info) =>
         {
             _round++;
+
+            return HookResult.Continue;
+        });
+
+        RegisterEventHandler<EventGameEnd>((@event, info) =>
+        {
+            _round = 0;
 
             return HookResult.Continue;
         });
@@ -118,8 +164,9 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
             _noVipsRounds.Add(itemInteger);
         }
 
-        AddTimer(2.0f, () => 
-        { 
+        //create dictionary
+        AddTimer(2.0f, () =>
+        {
             CreateDictWeaponsNameSlot();
             CreateConstGearSlots();
         });
@@ -226,7 +273,7 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
             return;
 
         if (playerActiveSlots.ContainsKey(item))
-           return;
+            return;
 
         if (!playerActiveSlots.ContainsKey(item))
         {
