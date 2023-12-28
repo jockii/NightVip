@@ -10,7 +10,6 @@ The following are currently available:
 * Bhop
 * Give weapons
 * HealthShot
-* Weapons in list
 * ClanTag in scoreboard
 ### `Config`
 addons/counterstrikesharp/configs/plugins/NightVip/NightVip.json
