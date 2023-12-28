@@ -7,6 +7,8 @@ The following are currently available:
 * Armor + Helmet
 * Money
 * Gravity
+* Bhop
+* Give weapons
 * HealthShot
 * Weapons in list
 * ClanTag in scoreboard
