@@ -17,6 +17,7 @@ using System.Runtime.Intrinsics.X86;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Linq;
+using CounterStrikeSharp.API.Modules.Entities.Constants;
 
 namespace NightVip;
 
@@ -48,7 +49,7 @@ public class NightVipConfig : BasePluginConfig
 public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 {
     public override string ModuleName => "NightVip";
-    public override string ModuleVersion => "v1.5.0";
+    public override string ModuleVersion => "v1.5.1";
     public override string ModuleAuthor => "jockii";
 
     public static List<int?> _vips = new List<int?>();
@@ -57,7 +58,7 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
     private static Dictionary<gear_slot_t, uint> _constslot = new Dictionary<gear_slot_t, uint>();
 
-    //public static Dictionary<CCSPlayerController, int> _jumps = new Dictionary<CCSPlayerController, int>();
+    //public static Dictionary<CCSPlayerController, int> _jumps = new Dictionary<CCSPlayerController, int>(); // in v1.6.0 add Double Jump
 
     private static Dictionary<string, int> _weaponslot = new Dictionary<string, int>();
 
@@ -169,7 +170,7 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
         });
     }
 
-    private List<int> GetNoVipsRounds()
+    private void GetNoVipsRounds()
     {
         string[] _rounds = Config.DisableVipRounds.Split(',');
 
@@ -178,8 +179,6 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
             int round = Convert.ToInt32(_round);
             _noVipsRounds.Add(round);
         }
-
-        return _noVipsRounds;
     }
 
     private Dictionary<string, int> CreateDictWeaponsNameSlot()
@@ -257,8 +256,7 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
     private void GiveWeaponItem(CCSPlayerController pl, string item)
     {
-        if (item == null || item == "")
-            return;
+        if (item == null || item == "") return;
 
         int itemSlot = _weaponslot[item];
 
