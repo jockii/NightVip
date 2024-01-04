@@ -3,21 +3,9 @@ using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
-using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Utils;
-using CounterStrikeSharp.API.Modules.Listeners;
-using System;
-using System.Data;
-using System.Numerics;
 using System.Text.Json.Serialization;
-using static CounterStrikeSharp.API.Core.Listeners;
 using CounterStrikeSharp.API.Modules.Cvars;
-using static System.Formats.Asn1.AsnWriter;
-using System.Runtime.Intrinsics.X86;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
-using System.Linq;
-using CounterStrikeSharp.API.Modules.Entities.Constants;
 
 namespace NightVip;
 
@@ -95,6 +83,14 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
         RegisterEventHandler<EventRoundStart>((@event, info) =>
         {
+            //clear _round
+            var mp_maxrounds = ConVar.Find("mp_maxrounds");
+
+            int serverMaxRounds = mp_maxrounds!.GetPrimitiveValue<int>();
+
+            if (_round == serverMaxRounds)
+                _round = 0;
+
             //for auto bhop
             if (Config.EnableAutoBhop)
             {
@@ -147,14 +143,6 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
             return HookResult.Continue;
         });
-
-        RegisterEventHandler<EventGameEnd>((@event, info) =>
-        {
-            _round = 0;
-
-            return HookResult.Continue;
-        });
-
 
         // for no vip rounds
         AddTimer(1.0f, () =>
