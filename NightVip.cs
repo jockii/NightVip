@@ -83,14 +83,6 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 
         RegisterEventHandler<EventRoundStart>((@event, info) =>
         {
-            //clear _round
-            var mp_maxrounds = ConVar.Find("mp_maxrounds");
-
-            int serverMaxRounds = mp_maxrounds!.GetPrimitiveValue<int>();
-
-            if (_round == serverMaxRounds)
-                _round = 0;
-
             //for auto bhop
             if (Config.EnableAutoBhop)
             {
@@ -142,6 +134,11 @@ public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
             _round++;
 
             return HookResult.Continue;
+        });
+
+        RegisterListener<Listeners.OnMapEnd>(() =>
+        {
+            _round = 0;
         });
 
         // for no vip rounds
