@@ -3,21 +3,10 @@ using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
-using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Utils;
-using CounterStrikeSharp.API.Modules.Listeners;
-using System;
-using System.Data;
-using System.Numerics;
 using System.Text.Json.Serialization;
-using static CounterStrikeSharp.API.Core.Listeners;
 using CounterStrikeSharp.API.Modules.Cvars;
-using static System.Formats.Asn1.AsnWriter;
-using System.Runtime.Intrinsics.X86;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
-using System.Linq;
-using CounterStrikeSharp.API.Modules.Entities.Constants;
+
 
 namespace NightVip;
 
@@ -49,7 +38,7 @@ public class NightVipConfig : BasePluginConfig
 public class NightVip : BasePlugin, IPluginConfig<NightVipConfig>
 {
     public override string ModuleName => "NightVip";
-    public override string ModuleVersion => "v1.5.1";
+    public override string ModuleVersion => "v1.5.2";
     public override string ModuleAuthor => "jockii";
 
     public static List<int?> _vips = new List<int?>();

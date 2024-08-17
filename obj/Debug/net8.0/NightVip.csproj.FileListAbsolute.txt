@@ -1,0 +1,12 @@
+C:\Users\amaur\Downloads\NightVip-master\NightVip-master\bin\Debug\net8.0\NightVip.deps.json
+C:\Users\amaur\Downloads\NightVip-master\NightVip-master\bin\Debug\net8.0\NightVip.dll
+C:\Users\amaur\Downloads\NightVip-master\NightVip-master\bin\Debug\net8.0\NightVip.pdb
+C:\Users\amaur\Downloads\NightVip-master\NightVip-master\obj\Debug\net8.0\NightVip.csproj.AssemblyReference.cache
+C:\Users\amaur\Downloads\NightVip-master\NightVip-master\obj\Debug\net8.0\NightVip.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\amaur\Downloads\NightVip-master\NightVip-master\obj\Debug\net8.0\NightVip.AssemblyInfoInputs.cache
+C:\Users\amaur\Downloads\NightVip-master\NightVip-master\obj\Debug\net8.0\NightVip.AssemblyInfo.cs
+C:\Users\amaur\Downloads\NightVip-master\NightVip-master\obj\Debug\net8.0\NightVip.csproj.CoreCompileInputs.cache
+C:\Users\amaur\Downloads\NightVip-master\NightVip-master\obj\Debug\net8.0\NightVip.dll
+C:\Users\amaur\Downloads\NightVip-master\NightVip-master\obj\Debug\net8.0\refint\NightVip.dll
+C:\Users\amaur\Downloads\NightVip-master\NightVip-master\obj\Debug\net8.0\NightVip.pdb
+C:\Users\amaur\Downloads\NightVip-master\NightVip-master\obj\Debug\net8.0\ref\NightVip.dll
